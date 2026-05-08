@@ -11,6 +11,8 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { user, signInWithEmailAndPassword } = useAuth();
+
+  // Clear old Firebase session every time admin gate opens
   useEffect(() => {
     const clearOldSession = async () => {
       try {
@@ -39,9 +41,6 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
         doc(db, "adminSettings", "security")
       );
 
-      let adminEmail = "admin@vkcafe.com";
-      let adminPassword = "vkcafe-secure";
-
       if (snap.exists()) {
         const data = snap.data();
 
@@ -54,11 +53,15 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
           validCode1 === code1.trim() &&
           validCode2 === code2.trim()
         ) {
-          adminEmail =
-            data.adminEmail || adminEmail;
+          const adminEmail = data.adminEmail;
+          const adminPassword = data.adminPassword;
 
-          adminPassword =
-            data.adminPassword || adminPassword;
+          if (!adminEmail || !adminPassword) {
+            console.log("Missing Firebase credentials");
+            setError(true);
+            setIsLoading(false);
+            return;
+          }
 
           console.log("Codes verified");
 
@@ -79,29 +82,8 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
           setError(true);
         }
       } else {
-        console.log(
-          "Security document missing — using local fallback"
-        );
-
-        if (
-          code1.trim() === "vk" &&
-          code2.trim() === "cafe"
-        ) {
-          await signInWithEmailAndPassword(
-            auth,
-            adminEmail,
-            adminPassword
-          );
-
-          localStorage.setItem(
-            "vk-admin-auth",
-            "true"
-          );
-
-          console.log("Firebase auth success");
-        } else {
-          setError(true);
-        }
+        console.log("Security document missing");
+        setError(true);
       }
     } catch (err) {
       console.error("Admin Auth Error:", err);
@@ -111,13 +93,14 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
     setIsLoading(false);
   };
 
-  // If authenticated → open dashboard
+  // Open dashboard only if authenticated + locally verified
   if (
     user &&
     localStorage.getItem("vk-admin-auth") === "true"
   ) {
     return <AdminDashboard onClose={onClose} />;
   }
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-6"
