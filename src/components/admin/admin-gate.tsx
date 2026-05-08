@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AdminDashboard } from "./admin-dashboard";
 import { doc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
@@ -11,6 +11,18 @@ export function AdminGate({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const { user, signInWithEmailAndPassword } = useAuth();
+  useEffect(() => {
+    const clearOldSession = async () => {
+      try {
+        await auth.signOut();
+        localStorage.removeItem("vk-admin-auth");
+      } catch (e) {
+        console.log(e);
+      }
+    };
+
+    clearOldSession();
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

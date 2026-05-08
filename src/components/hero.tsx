@@ -8,8 +8,7 @@ export function Hero() {
       <div className="absolute inset-0 animate-light-bloom">
         {/* We keep the unicornProjectId from BRAND for now as it's a technical config, 
             or we could add it to settings if needed. For now let's focus on visible text. */}
-        <UnicornBackground projectId="RVotqzWmLjhOBY4seMj2" />
-      </div>
+        <UnicornBackground />      </div>
 
       {/* Top brand mark */}
       <div className="absolute top-8 left-0 right-0 flex justify-center z-20 animate-soft-in delay-300">
