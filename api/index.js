@@ -1,5 +1,5 @@
-import server from "../dist/server/server.js";
+import handler from "../dist/server/server.js";
 
-export default async function handler(req, res) {
-    return server(req, res);
+export default async function (req, res) {
+    return handler(req, res);
 }
